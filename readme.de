@@ -1,1 +1,21 @@
 # CLI for Azure DevOps Pipelines
+
+## Installation 
+
+## Usage 
+
+## Development 
+
+### Prerequisites
+
+### Run 
+* `go run main.go`
+
+### Build 
+
+### 
+
+
+## Resources 
+* https://github.com/spf13/cobra 
+* https://github.com/spf13/cobra-cli
