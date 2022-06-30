@@ -23,59 +23,35 @@ package cmd
 
 import (
 	"fmt"
-	"log"
-
-	"github.com/iamNoah1/az-pipeline-cli/internal"
 
 	"github.com/spf13/cobra"
 )
 
-// loginCmd represents the login command
-var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "Login to Azure DevOps",
-	Long:  `Loging in to Azure DevOps for this CLI means to grab username and PAT and store them for further commands`,
+// setCmd represents the set command
+var setCmd = &cobra.Command{
+	Use:   "set",
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
 
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		exists, err := internal.FileExists(internal.CredsFileAbsolute())
-		if nil != err {
-			log.Fatal(err)
-		}
-		if exists {
-			fmt.Println("logged in")
-			return
-		}
-
-		fmt.Print("username: ")
-		var username string = internal.ReadFromConsole()
-
-		fmt.Print("organization: ")
-		var organization string = internal.ReadFromConsole()
-
-		fmt.Print("PAT: ")
-		var token string = internal.ReadFromConsole()
-
-		creds := internal.Credentials{Username: username, Token: token, Organization: organization}
-		err = internal.WriteCredentials(creds)
-
-		if nil != err {
-			log.Fatal(err)
-		} else {
-			fmt.Println("logged in")
-		}
+		fmt.Println("set called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(loginCmd)
+	projectCmd.AddCommand(setCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// loginCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// setCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// loginCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// setCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

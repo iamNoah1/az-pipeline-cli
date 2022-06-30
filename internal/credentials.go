@@ -11,8 +11,9 @@ import (
 const credsFileName = ".az-pipelines-creds"
 
 type Credentials struct {
-	Username string
-	Token    string
+	Username     string
+	Token        string
+	Organization string
 }
 
 func CredsFileAbsolute() string {
@@ -31,4 +32,17 @@ func WriteCredentials(creds Credentials) error {
 
 	content, _ := json.Marshal(creds)
 	return ioutil.WriteFile(CredsFileAbsolute(), content, 0644)
+}
+
+func ReadCredentials() (Credentials, error) {
+	raw, err := ioutil.ReadFile(CredsFileAbsolute())
+
+	if nil != err {
+		log.Fatalf("Could not read credentials file. Error: %s", err)
+	}
+
+	var creds Credentials
+	err = json.Unmarshal(raw, &creds)
+
+	return creds, err
 }
