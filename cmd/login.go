@@ -53,7 +53,7 @@ var loginCmd = &cobra.Command{
 		var organization string = internal.ReadFromConsole()
 
 		fmt.Print("PAT: ")
-		var token string = internal.ReadFromConsole()
+		var token string = ":" + internal.ReadFromConsole()
 
 		creds := internal.Credentials{Username: username, Token: token, Organization: organization}
 		err = internal.WriteCredentials(creds)
