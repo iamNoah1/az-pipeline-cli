@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -37,8 +36,6 @@ func WriteCredentials(creds Credentials) error {
 
 func ReadCredentials() (Credentials, error) {
 	raw, err := ioutil.ReadFile(CredsFileAbsolute())
-
-	fmt.Print("bla")
 
 	if nil != err {
 		log.Fatalf("Could not read credentials file. Error: %s", err)

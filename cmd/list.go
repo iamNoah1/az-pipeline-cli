@@ -72,7 +72,7 @@ var listCmd = &cobra.Command{
 		json.Unmarshal([]byte(responseBody), &responseJson)
 
 		for _, project := range responseJson.Value {
-			fmt.Println(project)
+			fmt.Println(project.Name)
 		}
 	},
 }
