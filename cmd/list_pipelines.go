@@ -22,14 +22,20 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
 
+	"github.com/iamNoah1/az-pipeline-cli/internal"
 	"github.com/spf13/cobra"
 )
 
-// setCmd represents the set command
-var setCmd = &cobra.Command{
-	Use:   "set",
+// listPipelinesCmd represents the listPipelines command
+var listPipelinesCmd = &cobra.Command{
+	Use:   "list",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -38,20 +44,59 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("set called, not implemented yet")
+		project, err := cmd.Flags().GetString("project")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		creds, err := internal.ReadCredentials()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		q := req.URL.Query()
+		q.Add("api-version", "6.0")
+
+		req.URL.RawQuery = q.Encode()
+
+		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(creds.Token)))
+
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Fatal("Errored when sending request to the server")
+		}
+
+		defer resp.Body.Close()
+		responseBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var responseJson internal.PipelineResponse
+		json.Unmarshal([]byte(responseBody), &responseJson)
+
+		for _, pipeline := range responseJson.Value {
+			fmt.Println(pipeline.Name)
+		}
 	},
 }
 
 func init() {
-	projectCmd.AddCommand(setCmd)
+	pipelinesCmd.AddCommand(listPipelinesCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// setCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// listPipelinesCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// setCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// listPipelinesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

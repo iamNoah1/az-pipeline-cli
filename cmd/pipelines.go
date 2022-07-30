@@ -27,9 +27,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// setCmd represents the set command
-var setCmd = &cobra.Command{
-	Use:   "set",
+// pipelinesCmd represents the pipelines command
+var pipelinesCmd = &cobra.Command{
+	Use:   "pipelines",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -38,20 +38,14 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("set called, not implemented yet")
+		fmt.Println("Error: must also specify a subcommand for the project resource")
 	},
 }
 
 func init() {
-	projectCmd.AddCommand(setCmd)
+	rootCmd.AddCommand(pipelinesCmd)
 
-	// Here you will define your flags and configuration settings.
+	pipelinesCmd.PersistentFlags().String("project", "", "The project, you want to list the pipelines for.")
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// setCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// setCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	pipelinesCmd.MarkPersistentFlagRequired("project")
 }
