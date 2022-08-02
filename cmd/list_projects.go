@@ -22,12 +22,9 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
-	"net/http"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
 	"github.com/spf13/cobra"
@@ -44,29 +41,7 @@ var listCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/_apis/projects", creds.Organization), nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		q := req.URL.Query()
-		q.Add("api-version", "6.0")
-
-		req.URL.RawQuery = q.Encode()
-
-		req.Header.Add("Authorization", "Basic "+base64.StdEncoding.EncodeToString([]byte(creds.Token)))
-
-		client := &http.Client{}
-		resp, err := client.Do(req)
-		if err != nil {
-			log.Fatal("Errored when sending request to the server")
-		}
-
-		defer resp.Body.Close()
-		responseBody, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			log.Fatal(err)
-		}
+		responseBody := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/_apis/projects", creds.Organization), creds.Token)
 
 		var responseJson internal.ProjectResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)
