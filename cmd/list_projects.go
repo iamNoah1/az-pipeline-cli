@@ -33,15 +33,18 @@ import (
 // listCmd represents the list command
 var listCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Get a list of all projects of your organization",
-	Long:  `Get a list of all projects of your organization`,
+	Short: "Get a list of all projects in your organization",
+	Long:  `Get a list of all projects in your organization`,
 	Run: func(cmd *cobra.Command, args []string) {
 		creds, err := internal.ReadCredentials()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		responseBody := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/_apis/projects", creds.Organization), creds.Token)
+		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/_apis/projects", creds.Organization), creds.Token)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		var responseJson internal.ProjectResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)

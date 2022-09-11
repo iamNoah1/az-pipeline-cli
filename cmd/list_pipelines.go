@@ -51,7 +51,10 @@ to quickly create a Cobra application.`,
 			log.Fatal(err)
 		}
 
-		responseBody := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), creds.Token)
+		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), creds.Token)
+		if err != nil {
+			log.Fatal(err)
+		}
 
 		var responseJson internal.PipelineResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)
