@@ -41,7 +41,14 @@ var loginCmd = &cobra.Command{
 		if nil != err {
 			log.Fatal(err)
 		}
-		if exists {
+
+		force, err := cmd.Flags().GetBool("force")
+		if nil != err {
+			log.Fatal(err)
+		}
+
+		if exists && !force {
+			fmt.Println("here")
 			fmt.Println("logged in")
 			return
 		}
@@ -77,5 +84,5 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// loginCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	loginCmd.Flags().BoolP("force", "f", false, "Force login even if already logged in")
 }

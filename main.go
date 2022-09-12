@@ -21,7 +21,9 @@ THE SOFTWARE.
 */
 package main
 
-import "github.com/iamNoah1/az-pipeline-cli/cmd"
+import (
+	"github.com/iamNoah1/az-pipeline-cli/cmd"
+)
 
 func main() {
 	cmd.Execute()
