@@ -19,7 +19,7 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package pipeline
 
 import (
 	"encoding/json"
@@ -30,41 +30,51 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listCmd represents the list command
-var listCmd = &cobra.Command{
+// listPipelinesCmd represents the listPipelines command
+var listPipelinesCmd = &cobra.Command{
 	Use:   "list",
-	Short: "Get a list of all projects in your organization",
-	Long:  `Get a list of all projects in your organization`,
+	Short: "A brief description of your command",
+	Long: `A longer description that spans multiple lines and likely contains examples
+and usage of using your command. For example:
+
+Cobra is a CLI library for Go that empowers applications.
+This application is a tool to generate the needed files
+to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		project, err := cmd.Flags().GetString("project")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		creds, err := internal.ReadCredentials()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/_apis/projects", creds.Organization), creds.Token)
+		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), creds.Token)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		var responseJson internal.ProjectResponse
+		var responseJson internal.PipelineResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)
 
-		for _, project := range responseJson.Value {
-			fmt.Println(project.Name)
+		for _, pipeline := range responseJson.Value {
+			fmt.Println(pipeline.Name)
 		}
 	},
 }
 
 func init() {
-	projectCmd.AddCommand(listCmd)
+	pipelinesCmd.AddCommand(listPipelinesCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// listPipelinesCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// listPipelinesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

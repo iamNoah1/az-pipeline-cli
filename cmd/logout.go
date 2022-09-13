@@ -54,7 +54,7 @@ var logoutCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(logoutCmd)
+	RootCmd.AddCommand(logoutCmd)
 
 	// Here you will define your flags and configuration settings.
 

@@ -19,24 +19,52 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package project
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
 
+	"github.com/iamNoah1/az-pipeline-cli/internal"
 	"github.com/spf13/cobra"
 )
 
-// projectCmd represents the project command
-var projectCmd = &cobra.Command{
-	Use:   "project",
-	Short: "Azure DevOps Projects resource",
-	Long:  `Azure DevOps Projects resource`,
+// listCmd represents the list command
+var listCmd = &cobra.Command{
+	Use:   "list",
+	Short: "Get a list of all projects in your organization",
+	Long:  `Get a list of all projects in your organization`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("Error: must also specify a subcommand for the project resource")
+		creds, err := internal.ReadCredentials()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/_apis/projects", creds.Organization), creds.Token)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var responseJson internal.ProjectResponse
+		json.Unmarshal([]byte(responseBody), &responseJson)
+
+		for _, project := range responseJson.Value {
+			fmt.Println(project.Name)
+		}
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(projectCmd)
+	projectCmd.AddCommand(listCmd)
+
+	// Here you will define your flags and configuration settings.
+
+	// Cobra supports Persistent Flags which will work for this command
+	// and all subcommands, e.g.:
+	// listCmd.PersistentFlags().String("foo", "", "A help for foo")
+
+	// Cobra supports local flags which will only run when this command
+	// is called directly, e.g.:
+	// listCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

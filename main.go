@@ -23,8 +23,12 @@ package main
 
 import (
 	"github.com/iamNoah1/az-pipeline-cli/cmd"
+	"github.com/iamNoah1/az-pipeline-cli/cmd/pipeline"
+	"github.com/iamNoah1/az-pipeline-cli/cmd/project"
 )
 
 func main() {
+	project.Init()
+	pipeline.Init()
 	cmd.Execute()
 }
