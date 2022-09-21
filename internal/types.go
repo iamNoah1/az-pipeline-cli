@@ -21,6 +21,8 @@ THE SOFTWARE.
 */
 package internal
 
+import "time"
+
 type Project struct {
 	Name string `json:name`
 }
@@ -31,8 +33,21 @@ type ProjectResponse struct {
 
 type Pipeline struct {
 	Name string `json:name`
+	Id   int    `json:id`
 }
 
 type PipelineResponse struct {
 	Value []Pipeline `json:value`
+}
+
+type PipelineRun struct {
+	Name     string    `json:name`
+	State    string    `json:state`
+	Result   string    `json:result`
+	Created  time.Time `json:createdDate`
+	Finished time.Time `json:finishedDate`
+}
+
+type PipelineRunResponse struct {
+	Value []PipelineRun `json:value`
 }

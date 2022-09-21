@@ -30,13 +30,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listPipelinesCmd represents the listPipelines command
-var listPipelinesCmd = &cobra.Command{
-	Use:   "list",
-	Short: "Lists all pipelines of a given project",
-	Long:  `Lists all pipelines of a given project`,
+// pipelineRunsCmd represents the pipelineRuns command
+var pipelineRunsCmd = &cobra.Command{
+	Use:   "runs",
+	Short: "List runs of a given pipeline",
+	Long:  `List runs of a given pipeline`,
 	Run: func(cmd *cobra.Command, args []string) {
 		project, err := cmd.Flags().GetString("project")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		pipelineId, err := cmd.Flags().GetString("pipelineId")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -46,31 +51,24 @@ var listPipelinesCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), creds.Token)
+		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s/runs", creds.Organization, project, pipelineId), creds.Token)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		var responseJson internal.PipelineResponse
+		var responseJson internal.PipelineRunResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)
 		//fmt.Print(string(responseBody))
 
-		for _, pipeline := range responseJson.Value {
-			fmt.Printf("Name: %s, Id: %d \n", pipeline.Name, pipeline.Id)
+		for _, pipelineRun := range responseJson.Value {
+			fmt.Printf("Name: %s, Created: %s, Finished: %s, State: %s, Result: %s ,\n", pipelineRun.Name, pipelineRun.Created, pipelineRun.Finished, pipelineRun.State, pipelineRun.Result)
 		}
 	},
 }
 
 func init() {
-	pipelinesCmd.AddCommand(listPipelinesCmd)
+	pipelinesCmd.AddCommand(pipelineRunsCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listPipelinesCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listPipelinesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	pipelineRunsCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
+	pipelineRunsCmd.MarkPersistentFlagRequired("pipelineId")
 }
