@@ -44,8 +44,8 @@ type PipelineRun struct {
 	Name     string    `json:name`
 	State    string    `json:state`
 	Result   string    `json:result`
-	Created  time.Time `json:createdDate`
-	Finished time.Time `json:finishedDate`
+	Created  time.Time `json:"createdDate"`
+	Finished time.Time `json:"finishedDate"`
 }
 
 type PipelineRunResponse struct {
