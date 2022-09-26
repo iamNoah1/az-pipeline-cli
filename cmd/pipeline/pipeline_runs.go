@@ -25,8 +25,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
 
@@ -60,10 +63,20 @@ var pipelineRunsCmd = &cobra.Command{
 		json.Unmarshal([]byte(responseBody), &responseJson)
 		//fmt.Print(string(responseBody))
 
-		for _, pipelineRun := range responseJson.Value {
-			fmt.Printf("Name: %s, Created: %s, Finished: %s, State: %s, Result: %s ,\n", pipelineRun.Name, pipelineRun.Created, pipelineRun.Finished, pipelineRun.State, pipelineRun.Result)
-		}
+		printPipelineRuns(responseJson)
 	},
+}
+
+func printPipelineRuns(pipelineRuns internal.PipelineRunResponse) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"Name", "State", "Result", "Created", "Finished"})
+
+	for _, pipelineRun := range pipelineRuns.Value {
+		t.AppendRow(table.Row{pipelineRun.Name, pipelineRun.State, pipelineRun.Result, pipelineRun.Created.Format(time.RFC1123), pipelineRun.Finished.Format(time.RFC1123)})
+	}
+
+	t.Render()
 }
 
 func init() {

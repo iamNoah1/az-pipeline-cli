@@ -25,8 +25,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
 
@@ -55,22 +57,22 @@ var listPipelinesCmd = &cobra.Command{
 		json.Unmarshal([]byte(responseBody), &responseJson)
 		//fmt.Print(string(responseBody))
 
-		for _, pipeline := range responseJson.Value {
-			fmt.Printf("Name: %s, Id: %d \n", pipeline.Name, pipeline.Id)
-		}
+		printPipelines(responseJson)
 	},
+}
+
+func printPipelines(pipelines internal.PipelineResponse) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"ID", "Name"})
+
+	for _, pipeline := range pipelines.Value {
+		t.AppendRow(table.Row{pipeline.Id, pipeline.Name})
+	}
+
+	t.Render()
 }
 
 func init() {
 	pipelinesCmd.AddCommand(listPipelinesCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// listPipelinesCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// listPipelinesCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

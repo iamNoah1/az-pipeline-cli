@@ -31,13 +31,8 @@ import (
 // pipelinesCmd represents the pipeline command
 var pipelinesCmd = &cobra.Command{
 	Use:   "pipeline",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Umbrella command for everything related to pipelines",
+	Long:  `Umbrella command for everything related to pipelines`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("Error: must also specify a subcommand for the project resource")
 	},
