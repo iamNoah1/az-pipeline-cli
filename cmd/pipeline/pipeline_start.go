@@ -22,23 +22,20 @@ THE SOFTWARE.
 package pipeline
 
 import (
-	"encoding/json"
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
-	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
 
-// pipelineRunsCmd represents the pipelineRuns command
-var pipelineRunsCmd = &cobra.Command{
-	Use:   "runs",
-	Short: "List runs of a given pipeline",
-	Long:  `List runs of a given pipeline`,
+// pipelineStartCmd represents the pipelineStart command
+var pipelineStartCmd = &cobra.Command{
+	Use:   "start",
+	Short: "Starts a pipeline (run)",
+	Long:  `Starts a pipeline (run)`,
 	Run: func(cmd *cobra.Command, args []string) {
 		project, err := cmd.Flags().GetString("project")
 		if err != nil {
@@ -55,34 +52,18 @@ var pipelineRunsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s/runs", creds.Organization, project, pipelineId), creds.Token, nil)
+		var jsonStr = []byte(`{"resources":{"repositories":{"self":{"refName": "refs/heads/main"}}}}`)
+
+		_, err = internal.InvokeDevOpsAPI(http.MethodPost, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s/runs", creds.Organization, project, pipelineId), creds.Token, bytes.NewBuffer(jsonStr))
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		var responseJson internal.PipelineRunResponse
-		json.Unmarshal([]byte(responseBody), &responseJson)
-		//fmt.Print(string(responseBody))
-
-		printPipelineRuns(responseJson)
 	},
 }
 
-func printPipelineRuns(pipelineRuns internal.PipelineRunResponse) {
-	t := table.NewWriter()
-	t.SetOutputMirror(os.Stdout)
-	t.AppendHeader(table.Row{"Name", "State", "Result", "Created", "Finished"})
-
-	for _, pipelineRun := range pipelineRuns.Value {
-		t.AppendRow(table.Row{pipelineRun.Name, pipelineRun.State, pipelineRun.Result, pipelineRun.Created.Format(time.RFC1123), pipelineRun.Finished.Format(time.RFC1123)})
-	}
-
-	t.Render()
-}
-
 func init() {
-	pipelinesCmd.AddCommand(pipelineRunsCmd)
+	pipelinesCmd.AddCommand(pipelineStartCmd)
 
-	pipelineRunsCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
-	pipelineRunsCmd.MarkPersistentFlagRequired("pipelineId")
+	pipelineStartCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
+	pipelineStartCmd.MarkPersistentFlagRequired("pipelineId")
 }

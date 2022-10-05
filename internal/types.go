@@ -48,6 +48,10 @@ type PipelineRun struct {
 	Finished time.Time `json:"finishedDate"`
 }
 
+type PipelineRunParameter struct {
+	resources string `json:resources`
+}
+
 type PipelineRunResponse struct {
 	Value []PipelineRun `json:value`
 }

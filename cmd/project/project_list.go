@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
 	"github.com/spf13/cobra"
@@ -41,7 +42,7 @@ var listCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/_apis/projects", creds.Organization), creds.Token)
+		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/_apis/projects", creds.Organization), creds.Token, nil)
 		if err != nil {
 			log.Fatal(err)
 		}

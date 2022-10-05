@@ -25,6 +25,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
@@ -48,7 +49,7 @@ var listPipelinesCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		responseBody, err := internal.InvokeDevOpsAPI(fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), creds.Token)
+		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), creds.Token, nil)
 		if err != nil {
 			log.Fatal(err)
 		}

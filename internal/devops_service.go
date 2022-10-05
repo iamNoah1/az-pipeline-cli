@@ -24,17 +24,21 @@ package internal
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
+	"os"
 )
 
-func InvokeDevOpsAPI(url string, token string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func InvokeDevOpsAPI(method string, url string, token string, body io.Reader) ([]byte, error) {
+	req, err := http.NewRequest(method, url, body)
 	if err != nil {
 		log.Fatal(err)
 		return nil, err
 	}
+	req.Header.Set("Content-Type", "application/json")
 
 	q := req.URL.Query()
 	q.Add("api-version", "6.0")
@@ -56,7 +60,10 @@ func InvokeDevOpsAPI(url string, token string) ([]byte, error) {
 		message := ""
 		if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
 			message = "Login is not valid, try to login again"
+		} else {
+			io.Copy(os.Stdout, resp.Body)
 		}
+		fmt.Println(message)
 		return nil, errors.New(message)
 	}
 
