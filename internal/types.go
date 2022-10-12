@@ -48,10 +48,22 @@ type PipelineRun struct {
 	Finished time.Time `json:"finishedDate"`
 }
 
-type PipelineRunParameter struct {
-	resources string `json:resources`
-}
-
 type PipelineRunResponse struct {
 	Value []PipelineRun `json:value`
+}
+
+type PipelineRunRequestParameter struct {
+	Resources PipelineRunRequestParameterResources `json:resources`
+}
+
+type PipelineRunRequestParameterResources struct {
+	Repositories PipelineRunRequestParameterRepositories `json:repositories`
+}
+
+type PipelineRunRequestParameterRepositories struct {
+	Self PipelineRunRequestParameterSelf `json:self`
+}
+
+type PipelineRunRequestParameterSelf struct {
+	RefName string `json:refName`
 }

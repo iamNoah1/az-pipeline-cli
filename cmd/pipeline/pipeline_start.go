@@ -23,6 +23,7 @@ package pipeline
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -47,17 +48,36 @@ var pipelineStartCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		branch, err := cmd.Flags().GetString("branch")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		creds, err := internal.ReadCredentials()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		var jsonStr = []byte(`{"resources":{"repositories":{"self":{"refName": "refs/heads/main"}}}}`)
+		var requestParams = internal.PipelineRunRequestParameter{
+			internal.PipelineRunRequestParameterResources{
+				internal.PipelineRunRequestParameterRepositories{
+					internal.PipelineRunRequestParameterSelf{
+						RefName: fmt.Sprintf("refs/heads/%s", branch),
+					},
+				},
+			},
+		}
 
-		_, err = internal.InvokeDevOpsAPI(http.MethodPost, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s/runs", creds.Organization, project, pipelineId), creds.Token, bytes.NewBuffer(jsonStr))
+		requestParamsMarshalled, err := json.Marshal(requestParams)
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		_, err = internal.InvokeDevOpsAPI(http.MethodPost, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s/runs", creds.Organization, project, pipelineId), creds.Token, bytes.NewBuffer(requestParamsMarshalled))
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println("pipeline started!")
 	},
 }
 
@@ -66,4 +86,6 @@ func init() {
 
 	pipelineStartCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
 	pipelineStartCmd.MarkPersistentFlagRequired("pipelineId")
+
+	pipelineStartCmd.PersistentFlags().StringP("branch", "b", "main", "The branch for the pipeline to run against")
 }
