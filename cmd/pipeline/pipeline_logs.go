@@ -27,18 +27,17 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
 
-// pipelineRunsCmd represents the pipelineRuns command
-var pipelineRunsCmd = &cobra.Command{
-	Use:   "runs",
-	Short: "List runs of a given pipeline",
-	Long:  `List runs of a given pipeline`,
+// pipelineLogsCmd represents the pipelineLogs command
+var pipelineLogsCmd = &cobra.Command{
+	Use:   "logs",
+	Short: "Gets the logs of a pipeline run",
+	Long:  `Gets the logs of a pipeline run`,
 	Run: func(cmd *cobra.Command, args []string) {
 		project, err := cmd.Flags().GetString("project")
 		if err != nil {
@@ -50,39 +49,47 @@ var pipelineRunsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		runId, err := cmd.Flags().GetString("runId")
+		if err != nil {
+			log.Fatal(err)
+		}
+
 		creds, err := internal.ReadCredentials()
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s/runs", creds.Organization, project, pipelineId), creds.Token, nil)
+		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s/runs/%s/logs", creds.Organization, project, pipelineId, runId), creds.Token, nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		var responseJson internal.PipelineRunResponse
+		var responseJson internal.PipelineRunLogsResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)
-		//fmt.Print(string(responseBody))
 
-		printPipelineRuns(responseJson)
+		printPipelineRunLog(responseJson, creds, project)
 	},
 }
 
-func printPipelineRuns(pipelineRuns internal.PipelineRunResponse) {
+func printPipelineRunLog(pipelineRunLogResponse internal.PipelineRunLogsResponse, creds internal.Credentials, project string) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 	t.AppendHeader(table.Row{"Id", "Name", "State", "Result", "Created", "Finished"})
-
-	for _, pipelineRun := range pipelineRuns.Value {
-		t.AppendRow(table.Row{pipelineRun.Id, pipelineRun.Name, pipelineRun.State, pipelineRun.Result, pipelineRun.Created.Format(time.RFC1123), pipelineRun.Finished.Format(time.RFC1123)})
+	//for _, pipelineRunLog := range pipelineRunLogResponse.Logs {
+	responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_build/results?buildId=380&view=logs", creds.Organization, project), creds.Token, nil)
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	t.Render()
+	fmt.Println(string(responseBody))
+	//}
 }
 
 func init() {
-	pipelinesCmd.AddCommand(pipelineRunsCmd)
+	pipelinesCmd.AddCommand(pipelineLogsCmd)
 
-	pipelineRunsCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
-	pipelineRunsCmd.MarkPersistentFlagRequired("pipelineId")
+	pipelineLogsCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
+	pipelineLogsCmd.MarkPersistentFlagRequired("pipelineId")
+
+	pipelineLogsCmd.PersistentFlags().StringP("runId", "r", "", "The id of the pipeline run to show logs for")
+	pipelineLogsCmd.MarkPersistentFlagRequired("runId")
 }

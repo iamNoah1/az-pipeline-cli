@@ -41,6 +41,7 @@ type PipelineResponse struct {
 }
 
 type PipelineRun struct {
+	Id       int       `json:id`
 	Name     string    `json:name`
 	State    string    `json:state`
 	Result   string    `json:result`
@@ -66,4 +67,12 @@ type PipelineRunRequestParameterRepositories struct {
 
 type PipelineRunRequestParameterSelf struct {
 	RefName string `json:refName`
+}
+
+type PipelineRunLogsResponse struct {
+	Logs []PipelineRunLogs `json:logs`
+}
+
+type PipelineRunLogs struct {
+	Url string `json:url`
 }
