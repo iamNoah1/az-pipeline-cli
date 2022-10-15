@@ -22,7 +22,6 @@ THE SOFTWARE.
 package pipeline
 
 import (
-	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -31,18 +30,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// pipelineLogsCmd represents the pipelineLogs command
-var pipelineLogsCmd = &cobra.Command{
-	Use:   "logs",
-	Short: "Gets the logs of a pipeline run",
-	Long:  `Gets the logs of a pipeline run`,
+// pipelineGetCmd represents the pipelineGet command
+var pipelineGetCmd = &cobra.Command{
+	Use:   "get",
+	Short: "Gets the definition of a pipeline",
+	Long:  `Gets the definition of a pipeline`,
 	Run: func(cmd *cobra.Command, args []string) {
 		project, err := cmd.Flags().GetString("project")
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		runId, err := cmd.Flags().GetString("runId")
+		pipelineId, err := cmd.Flags().GetString("pipelineId")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -52,32 +51,18 @@ var pipelineLogsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/build/builds/%s/logs", creds.Organization, project, runId), creds.Token, nil)
+		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s", creds.Organization, project, pipelineId), creds.Token, nil)
 		if err != nil {
 			log.Fatal(err)
 		}
-
-		var logsResponse internal.PipelineRunLogsResponse
-		json.Unmarshal([]byte(responseBody), &logsResponse)
-
-		// starting with 2 here, because 1 is the pipeline definition
-		for i := 2; i < logsResponse.Count; i++ {
-			responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/build/builds/%s/logs/%d", creds.Organization, project, runId, i), creds.Token, nil)
-			if err != nil {
-				log.Fatal(err)
-			}
-			fmt.Println(string(responseBody))
-		}
+		fmt.Println(string(responseBody))
 
 	},
 }
 
 func init() {
-	pipelinesCmd.AddCommand(pipelineLogsCmd)
+	pipelinesCmd.AddCommand(pipelineGetCmd)
 
-	pipelineLogsCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
-	pipelineLogsCmd.MarkPersistentFlagRequired("pipelineId")
-
-	pipelineLogsCmd.PersistentFlags().StringP("runId", "r", "", "The id of the pipeline run to show logs for")
-	pipelineLogsCmd.MarkPersistentFlagRequired("runId")
+	pipelineGetCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
+	pipelineGetCmd.MarkPersistentFlagRequired("pipelineId")
 }

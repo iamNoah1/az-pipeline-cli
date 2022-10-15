@@ -70,7 +70,7 @@ type PipelineRunRequestParameterSelf struct {
 }
 
 type PipelineRunLogsResponse struct {
-	Logs []PipelineRunLogs `json:logs`
+	Count int `json:count`
 }
 
 type PipelineRunLogs struct {
