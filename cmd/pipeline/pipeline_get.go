@@ -22,6 +22,7 @@ THE SOFTWARE.
 package pipeline
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -41,7 +42,7 @@ var pipelineGetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		pipelineId, err := cmd.Flags().GetString("pipelineId")
+		runId, err := cmd.Flags().GetString("runId")
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -51,12 +52,20 @@ var pipelineGetCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
-		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s", creds.Organization, project, pipelineId), creds.Token, nil)
+		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/build/builds/%s/logs", creds.Organization, project, runId), creds.Token, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var logsResponse internal.PipelineRunLogsResponse
+		json.Unmarshal([]byte(responseBody), &logsResponse)
+
+		// Don't ask why, but 1 is the pipeline definition
+		responseBody, err = internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/build/builds/%s/logs/1", creds.Organization, project, runId), creds.Token, nil)
 		if err != nil {
 			log.Fatal(err)
 		}
 		fmt.Println(string(responseBody))
-
 	},
 }
 
@@ -65,4 +74,7 @@ func init() {
 
 	pipelineGetCmd.PersistentFlags().StringP("pipelineId", "i", "", "The id of the pipeline to show the runs for")
 	pipelineGetCmd.MarkPersistentFlagRequired("pipelineId")
+
+	pipelineGetCmd.PersistentFlags().StringP("runId", "r", "", "The id of the pipeline run to show logs for")
+	pipelineGetCmd.MarkPersistentFlagRequired("runId")
 }
