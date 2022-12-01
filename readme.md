@@ -6,7 +6,9 @@
 
 ## Development 
 
-### Prerequisites
+### Prerequisites for Development
+* Set up Golang on your machine
+* Have a Azure DevOps Personal Access Token (PAT)
 
 ### Run 
 * `go run main.go <command> <subcommand>`
