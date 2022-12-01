@@ -23,35 +23,46 @@ package project
 
 import (
 	"fmt"
+	"log"
 
+	"github.com/iamNoah1/az-pipeline-cli/internal"
 	"github.com/spf13/cobra"
 )
 
 // setCmd represents the set command
 var setCmd = &cobra.Command{
-	Use:   "set",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "set <project-name>",
+	Short: "Set a project",
+	Long: `Set a project, so that you don't have to add it via flag for future commands. 
+			Note, that when setting a flag either way on future command, the project that was 
+			set via flag will be used and not the project that was set using this command.`,
+	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("set called, not implemented yet")
+		exists, err := internal.FileExists(internal.CredsFileAbsolute())
+		if nil != err {
+			log.Fatal(err)
+		}
+		if !exists {
+			fmt.Println("please log in first")
+			return
+		}
+
+		creds, err := internal.ReadCredentials()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		creds.Project = args[0]
+		err = internal.WriteCredentials(creds)
+
+		if nil != err {
+			log.Fatal(err)
+		} else {
+			fmt.Println("saved project for future commands")
+		}
 	},
 }
 
 func init() {
 	projectCmd.AddCommand(setCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// setCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// setCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

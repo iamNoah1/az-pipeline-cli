@@ -35,6 +35,7 @@ type Credentials struct {
 	Username     string
 	Token        string
 	Organization string
+	Project      string
 }
 
 func CredsFileAbsolute() string {
