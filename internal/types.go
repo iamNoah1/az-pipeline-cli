@@ -25,6 +25,7 @@ import "time"
 
 type Project struct {
 	Name string `json:name`
+	Id   string `json:id`
 }
 
 type ProjectResponse struct {

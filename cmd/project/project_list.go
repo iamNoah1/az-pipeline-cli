@@ -26,8 +26,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
+	"github.com/jedib0t/go-pretty/table"
 	"github.com/spf13/cobra"
 )
 
@@ -50,10 +52,20 @@ var listCmd = &cobra.Command{
 		var responseJson internal.ProjectResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)
 
-		for _, project := range responseJson.Value {
-			fmt.Println(project.Name)
-		}
+		printProjects(responseJson)
 	},
+}
+
+func printProjects(projects internal.ProjectResponse) {
+	t := table.NewWriter()
+	t.SetOutputMirror(os.Stdout)
+	t.AppendHeader(table.Row{"Id", "Name"})
+
+	for _, project := range projects.Value {
+		t.AppendRow(table.Row{project.Id, project.Name})
+	}
+
+	t.Render()
 }
 
 func init() {
