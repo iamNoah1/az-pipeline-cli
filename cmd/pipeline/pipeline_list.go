@@ -33,21 +33,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// listPipelinesCmd represents the listPipelines command
 var listPipelinesCmd = &cobra.Command{
 	Use:   "list",
 	Short: "Lists all pipelines of a given project",
 	Long:  `Lists all pipelines of a given project`,
 	Run: func(cmd *cobra.Command, args []string) {
-		project, err := cmd.Flags().GetString("project")
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		creds, err := internal.ReadCredentials()
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		project := getProject(cmd, creds)
 
 		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), creds.Token, nil)
 		if err != nil {
@@ -56,7 +52,6 @@ var listPipelinesCmd = &cobra.Command{
 
 		var responseJson internal.PipelineResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)
-		//fmt.Print(string(responseBody))
 
 		printPipelines(responseJson)
 	},

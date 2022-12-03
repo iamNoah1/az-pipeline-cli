@@ -37,11 +37,6 @@ var pipelineGetCmd = &cobra.Command{
 	Short: "Gets the definition of a pipeline",
 	Long:  `Gets the definition of a pipeline`,
 	Run: func(cmd *cobra.Command, args []string) {
-		project, err := cmd.Flags().GetString("project")
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		runId, err := cmd.Flags().GetString("runId")
 		if err != nil {
 			log.Fatal(err)
@@ -51,6 +46,8 @@ var pipelineGetCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		project := getProject(cmd, creds)
 
 		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/build/builds/%s/logs", creds.Organization, project, runId), creds.Token, nil)
 		if err != nil {

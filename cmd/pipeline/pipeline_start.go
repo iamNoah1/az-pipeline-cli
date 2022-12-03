@@ -32,17 +32,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// pipelineStartCmd represents the pipelineStart command
 var pipelineStartCmd = &cobra.Command{
 	Use:   "start",
 	Short: "Starts a pipeline (run)",
 	Long:  `Starts a pipeline (run)`,
 	Run: func(cmd *cobra.Command, args []string) {
-		project, err := cmd.Flags().GetString("project")
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		pipelineId, err := cmd.Flags().GetString("pipelineId")
 		if err != nil {
 			log.Fatal(err)
@@ -57,6 +51,8 @@ var pipelineStartCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		project := getProject(cmd, creds)
 
 		var requestParams = internal.PipelineRunRequestParameter{
 			internal.PipelineRunRequestParameterResources{

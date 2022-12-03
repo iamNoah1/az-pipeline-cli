@@ -34,17 +34,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// pipelineRunsCmd represents the pipelineRuns command
 var pipelineRunsCmd = &cobra.Command{
 	Use:   "runs",
 	Short: "List runs of a given pipeline",
 	Long:  `List runs of a given pipeline`,
 	Run: func(cmd *cobra.Command, args []string) {
-		project, err := cmd.Flags().GetString("project")
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		pipelineId, err := cmd.Flags().GetString("pipelineId")
 		if err != nil {
 			log.Fatal(err)
@@ -55,6 +49,8 @@ var pipelineRunsCmd = &cobra.Command{
 			log.Fatal(err)
 		}
 
+		project := getProject(cmd, creds)
+
 		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines/%s/runs", creds.Organization, project, pipelineId), creds.Token, nil)
 		if err != nil {
 			log.Fatal(err)
@@ -62,7 +58,6 @@ var pipelineRunsCmd = &cobra.Command{
 
 		var responseJson internal.PipelineRunResponse
 		json.Unmarshal([]byte(responseBody), &responseJson)
-		//fmt.Print(string(responseBody))
 
 		printPipelineRuns(responseJson)
 	},

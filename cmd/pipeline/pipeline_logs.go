@@ -31,17 +31,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// pipelineLogsCmd represents the pipelineLogs command
 var pipelineLogsCmd = &cobra.Command{
 	Use:   "logs",
 	Short: "Gets the logs of a pipeline run",
 	Long:  `Gets the logs of a pipeline run`,
 	Run: func(cmd *cobra.Command, args []string) {
-		project, err := cmd.Flags().GetString("project")
-		if err != nil {
-			log.Fatal(err)
-		}
-
 		runId, err := cmd.Flags().GetString("runId")
 		if err != nil {
 			log.Fatal(err)
@@ -51,6 +45,8 @@ var pipelineLogsCmd = &cobra.Command{
 		if err != nil {
 			log.Fatal(err)
 		}
+
+		project := getProject(cmd, creds)
 
 		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/build/builds/%s/logs", creds.Organization, project, runId), creds.Token, nil)
 		if err != nil {
