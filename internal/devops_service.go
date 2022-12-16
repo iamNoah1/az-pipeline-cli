@@ -27,15 +27,17 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
-	"os"
 )
 
 func InvokeDevOpsAPI(method string, url string, token string, body io.Reader) ([]byte, error) {
+	logger := GetLogger()
+
+	logger.DPanicf("Going to call '%s' with '%s' method", url, method)
+
 	req, err := http.NewRequest(method, url, body)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
@@ -50,7 +52,7 @@ func InvokeDevOpsAPI(method string, url string, token string, body io.Reader) ([
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Errored when sending request to the server")
+		logger.Fatal("Errored when sending request to the server", err)
 		return nil, err
 	}
 
@@ -59,17 +61,27 @@ func InvokeDevOpsAPI(method string, url string, token string, body io.Reader) ([
 	if resp.StatusCode != http.StatusOK {
 		message := ""
 		if resp.StatusCode == http.StatusUnauthorized || resp.StatusCode == http.StatusForbidden {
-			message = "Login is not valid, try to login again"
+			responseBody, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				logger.Fatal(err)
+				return nil, err
+			}
+			message = fmt.Sprintf("Login is not valid, try to login again. Error details: %s", string(responseBody))
 		} else {
-			io.Copy(os.Stdout, resp.Body)
+			responseBody, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				logger.Fatal(err)
+				return nil, err
+			}
+			message = fmt.Sprintf("Azure DevOps API returned an error indicating http code. Error details: %s", string(responseBody))
 		}
-		fmt.Println(message)
+		logger.Error(message)
 		return nil, errors.New(message)
 	}
 
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 		return nil, err
 	}
 

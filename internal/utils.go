@@ -26,6 +26,8 @@ import (
 	"errors"
 	"os"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 func FileExists(name string) (bool, error) {
@@ -43,4 +45,12 @@ func ReadFromConsole() string {
 	reader := bufio.NewReader(os.Stdin)
 	input, _ := reader.ReadString('\n')
 	return strings.TrimSpace(input)
+}
+
+func GetLogger() *zap.SugaredLogger {
+	logger := zap.NewExample()
+	defer logger.Sync()
+
+	var sugar = logger.Sugar()
+	return sugar
 }

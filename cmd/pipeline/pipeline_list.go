@@ -24,7 +24,6 @@ package pipeline
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -38,16 +37,18 @@ var listPipelinesCmd = &cobra.Command{
 	Short: "Lists all pipelines of a given project",
 	Long:  `Lists all pipelines of a given project`,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := internal.GetLogger()
+
 		creds, err := internal.ReadCredentials()
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		project := getProject(cmd, creds)
 
 		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/pipelines", creds.Organization, project), creds.Token, nil)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		var responseJson internal.PipelineResponse

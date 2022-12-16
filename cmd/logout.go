@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"fmt"
-	"log"
 	"os"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
@@ -36,33 +34,25 @@ var logoutCmd = &cobra.Command{
 	Long:  `Logout from Azure DevOps`,
 
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := internal.GetLogger()
+
 		exists, err := internal.FileExists(internal.CredsFileAbsolute())
 		if nil != err {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 		if exists {
 			err := os.Remove(internal.CredsFileAbsolute())
 			if nil != err {
-				log.Fatalf("Could not delete credentials file. Error: %s", err)
+				logger.Fatalf("Could not delete credentials file. Error: %s", err)
 			} else {
-				fmt.Println("logged out")
+				logger.Info("logged out")
 			}
 		} else {
-			fmt.Println("logged out")
+			logger.Info("logged out")
 		}
 	},
 }
 
 func init() {
 	RootCmd.AddCommand(logoutCmd)
-
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// logoutCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// logoutCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

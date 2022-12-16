@@ -24,7 +24,6 @@ package pipeline
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
@@ -36,21 +35,23 @@ var pipelineLogsCmd = &cobra.Command{
 	Short: "Gets the logs of a pipeline run",
 	Long:  `Gets the logs of a pipeline run`,
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := internal.GetLogger()
+
 		runId, err := cmd.Flags().GetString("runId")
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		creds, err := internal.ReadCredentials()
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		project := getProject(cmd, creds)
 
 		responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/build/builds/%s/logs", creds.Organization, project, runId), creds.Token, nil)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		var logsResponse internal.PipelineRunLogsResponse
@@ -60,9 +61,9 @@ var pipelineLogsCmd = &cobra.Command{
 		for i := 2; i < logsResponse.Count; i++ {
 			responseBody, err := internal.InvokeDevOpsAPI(http.MethodGet, fmt.Sprintf("https://dev.azure.com/%s/%s/_apis/build/builds/%s/logs/%d", creds.Organization, project, runId, i), creds.Token, nil)
 			if err != nil {
-				log.Fatal(err)
+				logger.Fatal(err)
 			}
-			fmt.Println(string(responseBody))
+			logger.Info(string(responseBody))
 		}
 
 	},

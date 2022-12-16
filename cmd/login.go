@@ -23,32 +23,32 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
 
 	"github.com/spf13/cobra"
 )
 
-// loginCmd represents the login command
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login to Azure DevOps",
 	Long:  `Loging in to Azure DevOps for this CLI means to grab username and PAT and store them for further commands`,
 
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := internal.GetLogger()
+
 		exists, err := internal.FileExists(internal.CredsFileAbsolute())
 		if nil != err {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		force, err := cmd.Flags().GetBool("force")
 		if nil != err {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		if exists && !force {
-			fmt.Println("logged in")
+			logger.Infoln("already logged in, force with '--force' ")
 			return
 		}
 
@@ -65,9 +65,9 @@ var loginCmd = &cobra.Command{
 		err = internal.WriteCredentials(creds)
 
 		if nil != err {
-			log.Fatal(err)
+			logger.Fatal(err)
 		} else {
-			fmt.Println("logged in")
+			logger.Infoln("logged in")
 		}
 	},
 }
@@ -75,13 +75,5 @@ var loginCmd = &cobra.Command{
 func init() {
 	RootCmd.AddCommand(loginCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// loginCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
 	loginCmd.Flags().BoolP("force", "f", false, "Force login even if already logged in")
 }

@@ -22,14 +22,10 @@ THE SOFTWARE.
 package project
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/iamNoah1/az-pipeline-cli/internal"
 	"github.com/spf13/cobra"
 )
 
-// setCmd represents the set command
 var setCmd = &cobra.Command{
 	Use:   "set <project-name>",
 	Short: "Set a project",
@@ -38,27 +34,29 @@ var setCmd = &cobra.Command{
 			set via flag will be used and not the project that was set using this command.`,
 	Args: cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
+		logger := internal.GetLogger()
+
 		exists, err := internal.FileExists(internal.CredsFileAbsolute())
 		if nil != err {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 		if !exists {
-			fmt.Println("please log in first")
+			logger.Info("please log in first")
 			return
 		}
 
 		creds, err := internal.ReadCredentials()
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal(err)
 		}
 
 		creds.Project = args[0]
 		err = internal.WriteCredentials(creds)
 
 		if nil != err {
-			log.Fatal(err)
+			logger.Fatal(err)
 		} else {
-			fmt.Println("saved project for future commands")
+			logger.Info("saved project for future commands")
 		}
 	},
 }

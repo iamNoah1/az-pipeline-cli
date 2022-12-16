@@ -23,7 +23,6 @@ package pipeline
 
 import (
 	"fmt"
-	"log"
 
 	"github.com/iamNoah1/az-pipeline-cli/internal"
 
@@ -31,7 +30,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// pipelinesCmd represents the pipeline command
 var pipelinesCmd = &cobra.Command{
 	Use:   "pipeline",
 	Short: "Umbrella command for everything related to pipelines",
@@ -42,15 +40,17 @@ var pipelinesCmd = &cobra.Command{
 }
 
 func getProject(cmd *cobra.Command, creds internal.Credentials) string {
+	logger := internal.GetLogger()
+
 	projectFromFlag, err := cmd.Flags().GetString("project")
 	if err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 
 	var project string
 	if "" == projectFromFlag {
 		if "" == creds.Project {
-			log.Fatal("Project must be set either with 'project set' command or through flag")
+			logger.Fatal("Project must be set either with 'project set' command or through flag")
 		}
 		project = creds.Project
 	}
@@ -61,5 +61,4 @@ func Init() {
 	cmd.RootCmd.AddCommand(pipelinesCmd)
 
 	pipelinesCmd.PersistentFlags().StringP("project", "p", "", "The project, you want to list the pipelines for.")
-	//pipelinesCmd.MarkPersistentFlagRequired("project")
 }
